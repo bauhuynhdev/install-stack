@@ -40,7 +40,7 @@ install_php() {
     echo "Installing PHP..."
     yum install https://rpms.remirepo.net/enterprise/remi-release-7.rpm -y
     yum-config-manager --enable remi-php74 -y
-    yum install -y php\*
+    yum install -y php-fpm php-mysqlnd php-zip php-devel php-gd php-mcrypt php-mbstring php-curl php-xml php-pear php-bcmath php-json php-pgsql php-redis
     echo "Installed PHP."
   fi
   echo "====================================="
