@@ -6,7 +6,6 @@ install_common() {
   echo "====================================="
   yum update -y
   yum install -y epel-release yum-utils zip unzip gcc-c++ make nano openssl
-
 }
 
 install_nginx() {
@@ -16,15 +15,7 @@ install_nginx() {
     echo "Installed Nginx."
   else
     echo "Installing Nginx..."
-    cat >/etc/yum.repos.d/nginx.repo <<'EOF'
-[nginx-stable]
-name=nginx stable repo
-baseurl=https://nginx.org/packages/centos/$releasever/$basearch/
-gpgcheck=1
-enabled=1
-gpgkey=https://nginx.org/keys/nginx_signing.key
-module_hotfixes=true
-EOF
+    curl https://raw.githubusercontent.com/bauhuynhdev/linux-repo/master/nginx.repo -L -o /etc/yum.repos.d/nginx.repo
     yum install -y nginx-1.20.2
     echo "Installed Nginx."
   fi
@@ -38,9 +29,8 @@ install_php() {
     echo "Installed PHP."
   else
     echo "Installing PHP..."
-    yum install https://rpms.remirepo.net/enterprise/remi-release-7.rpm -y
-    yum-config-manager --enable remi-php74 -y
-    yum install -y php-fpm php-mysqlnd php-zip php-devel php-gd php-mcrypt php-mbstring php-curl php-xml php-pear php-bcmath php-json php-pgsql php-redis
+    yum install -y https://raw.githubusercontent.com/bauhuynhdev/linux-repo/master/remi-release-7.rpm
+    yum --enablerepo=remi-php74 install -y php-fpm php-mysqlnd php-zip php-devel php-gd php-mcrypt php-mbstring php-curl php-xml php-pear php-bcmath php-json php-pgsql php-redis
     echo "Installed PHP."
   fi
   echo "====================================="
@@ -53,8 +43,7 @@ install_composer() {
     echo "Installed Composer."
   else
     echo "Installing Composer..."
-    php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-    php -r "if (hash_file('sha384', 'composer-setup.php') === '906a84df04cea2aa72f40b5f787e49f22d4c2f19492ac310e8cba5b96ac8b64115ac402c8cd292b8a03482574915d1a8') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+    php -r "copy('https://raw.githubusercontent.com/bauhuynhdev/linux-repo/master/composer-setup.php', 'composer-setup.php');"
     php composer-setup.php --install-dir=/usr/local/bin --filename=composer --version=2.2.9
     php -r "unlink('composer-setup.php');"
     echo "Installed Composer."
@@ -69,7 +58,7 @@ install_node() {
     echo "Installed Nodejs."
   else
     echo "Installing Nodejs..."
-    curl -fsSL https://rpm.nodesource.com/setup_14.x | bash -
+    curl -L https://raw.githubusercontent.com/bauhuynhdev/linux-repo/master/setup_14.x | bash -
     yum install -y nodejs
     npm install -g yarn
     echo "Installed Nodejs."
@@ -84,7 +73,7 @@ install_postgres() {
     echo "Installed Postgres."
   else
     echo "Installing Postgres..."
-    yum install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+    yum install -y https://raw.githubusercontent.com/bauhuynhdev/linux-repo/master/pgdg-redhat-repo-latest.noarch.rpm
     yum install -y postgresql13-server
     /usr/pgsql-13/bin/postgresql-13-setup initdb
     echo "Installed Postgres."
@@ -99,7 +88,7 @@ install_redis() {
     echo "Installed Redis."
   else
     echo "Installing Redis..."
-    yum -y install http://rpms.remirepo.net/enterprise/remi-release-7.rpm
+    # Installed repo redis in PHP
     yum --enablerepo=remi install redis -y
     /usr/pgsql-13/bin/postgresql-13-setup initdb
     echo "Installed Redis."
