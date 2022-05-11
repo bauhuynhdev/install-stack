@@ -1,56 +1,53 @@
 #!/bin/bash
 
+LOG_FILE="$0.log"
+
 remove_nginx() {
-  echo "====================================="
-  echo "Removing Nginx..."
+  echo "Removing Nginx..." >>"$LOG_FILE"
   yum remove -y nginx
   rm -f /etc/yum.repos.d/nginx.repo
-  echo "====================================="
 }
 
 remove_php() {
-  echo "====================================="
-  echo "Removing PHP..."
+  echo "Removing PHP..." >>"$LOG_FILE"
   yum remove -y php\*
-  echo "====================================="
 }
 
 remove_composer() {
-  echo "====================================="
-  echo "Removing Composer..."
+  echo "Removing Composer..." >>"$LOG_FILE"
   rm -f /usr/local/bin/composer
-  echo "====================================="
 }
 
 remove_node() {
-  echo "====================================="
-  echo "Removing Nodejs..."
+  echo "Removing Nodejs..." >>"$LOG_FILE"
   npm uninstall -g yarn
   yum remove -y nodejs
-  echo "====================================="
 }
 
 remove_postgres() {
-  echo "====================================="
-  echo "Removing Postgres..."
+  echo "Removing Postgres..." >>"$LOG_FILE"
   yum remove -y postgres\*
-  echo "====================================="
 }
 
 remove_redis() {
-  echo "====================================="
-  echo "Removing Redis..."
+  echo "Removing Redis..." >>"$LOG_FILE"
   yum remove -y redis
-  echo "====================================="
+}
+
+create_log_file() {
+  touch "$LOG_FILE"
+  cat /dev/null >"$LOG_FILE"
 }
 
 main() {
+  create_log_file
   remove_nginx
   remove_php
   remove_composer
   remove_node
   remove_postgres
   remove_redis
+  echo "Check $LOG_FILE"
 }
 
 main
