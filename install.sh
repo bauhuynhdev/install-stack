@@ -100,7 +100,13 @@ enable_and_start_services() {
   yum update -y
   # shellcheck disable=SC2046
   if [ $(command -v systemctl) ]; then
-    systemctl enable --now nginx
+
+    if [ "$(systemctl is-active nginx)" = "active" ]; then
+      echo "Nginx web server is running."
+    else
+      echo "Nginx web server is not running."
+      systemctl enable --now nginx
+    fi
     systemctl enable --now php-fpm
     systemctl enable --now mysqld
     echo "----------------------------------- MySQL temporary password -----------------------------------"
