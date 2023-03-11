@@ -2,110 +2,113 @@
 
 install_common() {
   yum update -y
-  yum install -y epel-release yum-utils zip net-tools curl wget unzip gcc-c++ make nano openssl
+  yum install -y epel-release yum-utils zip unzip net-tools curl wget gcc-c++ make nano openssl htop
   yum update -y
-  echo "Installed common."
+  echo "----------------------------------- Common installed -----------------------------------"
 }
 
 install_nginx() {
   # shellcheck disable=SC2046
   if [ $(command -v nginx) ]; then
-    echo "Installed Nginx."
+    echo "----------------------------------- Nginx installed -----------------------------------"
   else
-    echo "Installing Nginx latest version..."
+    echo "----------------------------------- Installing Nginx -----------------------------------"
     curl https://raw.githubusercontent.com/bauhuynhdev/linux-repo/master/nginx.repo -L -o /etc/yum.repos.d/nginx.repo
     yum install -y nginx
-    echo "To start Nginx: systemctl start nginx"
+    echo "----------------------------------- Nginx installed -----------------------------------"
   fi
 }
 
 install_php() {
   # shellcheck disable=SC2046
   if [ $(command -v php) ]; then
-    echo "Installed PHP."
+    echo "----------------------------------- PHP installed -----------------------------------"
   else
-    echo "Installing PHP 7.4 latest version"
+    echo "----------------------------------- Installing PHP -----------------------------------"
     yum install -y https://rpms.remirepo.net/enterprise/remi-release-7.rpm
     yum --enablerepo=remi-php74 install -y php php-cli php-fpm php-zip php-devel php-gd php-mcrypt php-mbstring php-curl php-xml php-pear php-bcmath php-json php-mysql php-redis -y
-    echo "To start PHP-FPM: systemctl start php-fpm"
+    echo "----------------------------------- PHP installed -----------------------------------"
   fi
 }
 
 install_composer() {
   # shellcheck disable=SC2046
   if [ $(command -v composer) ]; then
-    echo "Installed Composer."
+    echo "----------------------------------- Composer installed -----------------------------------"
   else
-    echo "Installing Composer latest version"
+    echo "----------------------------------- Installing Composer -----------------------------------"
     php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
     php composer-setup.php --install-dir=/usr/local/bin --filename=composer
     php -r "unlink('composer-setup.php');"
-    echo "Installed Composer."
+    echo "----------------------------------- Composer installed -----------------------------------"
   fi
 }
 
 install_nodejs_npm_pm2() {
   # shellcheck disable=SC2046
   if [ $(command -v node) ]; then
-    echo "Installed Nodejs."
+    echo "----------------------------------- Nodejs, NPM and PM2 installed -----------------------------------"
   else
-    echo "Installing Nodejs 14, NPM and PM2 latest version"
+    echo "----------------------------------- Installing Nodejs, NPM and PM2 -----------------------------------"
     curl -sL https://rpm.nodesource.com/setup_14.x | bash -
     yum install -y nodejs
     npm install -g yarn pm2
-    echo "Installed Nodejs, NPM and PM2."
+    echo "----------------------------------- Nodejs, NPM and PM2 installed -----------------------------------"
   fi
 }
 
 install_postgres() {
   # shellcheck disable=SC2046
   if [ $(command -v psql) ]; then
-    echo "Installed Postgres."
+    echo "----------------------------------- Postgres installed -----------------------------------"
   else
-    echo "Installing Postgres 13 latest version"
+    echo "----------------------------------- Installing Postgres -----------------------------------"
     yum install -y https://raw.githubusercontent.com/bauhuynhdev/linux-repo/master/pgdg-redhat-repo-latest.noarch.rpm
     yum install -y postgresql13-server
     /usr/pgsql-13/bin/postgresql-13-setup initdb
-    echo "To start Postgres: systemctl start postgresql-13"
+    echo "----------------------------------- Postgres installed -----------------------------------"
   fi
 }
 
 install_mysql() {
   # shellcheck disable=SC2046
   if [ $(command -v mysql) ]; then
-    echo "Installed MySQL."
+    echo "----------------------------------- MySQL installed -----------------------------------"
   else
-    echo "Installing MySQL 8 latest version"
+    echo "----------------------------------- Installing MySQL -----------------------------------"
     rpm -Uvh https://dev.mysql.com/get/mysql80-community-release-el7-7.noarch.rpm
     sed -i 's/enabled=1/enabled=0/' /etc/yum.repos.d/mysql-community.repo
     yum --enablerepo=mysql80-community install mysql-community-server -y
-    echo "To start MySQL: systemctl start mysqld"
+    echo "----------------------------------- MySQL installed -----------------------------------"
   fi
 }
 
 install_redis() {
   # shellcheck disable=SC2046
   if [ $(command -v redis-cli) ]; then
-    echo "Installed Redis."
+    echo "----------------------------------- Redis installed -----------------------------------"
   else
-    echo "Installing Redis latest version"
+    echo "----------------------------------- Installing Redis -----------------------------------"
     # Installed repo redis in PHP
     yum --enablerepo=remi install redis -y
-    echo "To start Redis: systemctl start redis"
+    echo "----------------------------------- Redis installed -----------------------------------"
   fi
 }
 
 enable_and_start_services() {
+  yum update -y
   # shellcheck disable=SC2046
   if [ $(command -v systemctl) ]; then
     systemctl enable --now nginx
     systemctl enable --now php-fpm
     systemctl enable --now mysqld
+    echo "----------------------------------- MySQL temporary password -----------------------------------"
     grep "A temporary password" /var/log/mysqld.log
     echo "You will need run this command to change password: mysql_secure_installation"
+    echo "------------------------------------------------------------------------------------------------"
     systemctl enable --now redis
   fi
-  echo "Enabled services."
+  echo "----------------------------------- Services enabled and started -----------------------------------"
 }
 
 main() {
@@ -120,10 +123,10 @@ main() {
       install_redis
       enable_and_start_services
     else
-      echo "This is not CentOS 7."
+      echo "- This script only support CentOS 7."
     fi
   else
-    echo "This is not CentOS."
+    echo "- This script only support CentOS 7."
   fi
 }
 
