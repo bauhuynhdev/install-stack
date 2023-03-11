@@ -1,109 +1,130 @@
 #!/bin/bash
 
-LOG_FILE="$0.log"
-
 install_common() {
   yum update -y
-  yum install -y epel-release yum-utils zip unzip gcc-c++ make nano openssl
-  echo "Run update and install base packages." >>"$LOG_FILE"
+  yum install -y epel-release yum-utils zip net-tools curl wget unzip gcc-c++ make nano openssl
+  yum update -y
+  echo "Installed common."
 }
 
 install_nginx() {
-  if command -v nginx >/dev/null; then
-    echo "Installed Nginx." >>"$LOG_FILE"
+  # shellcheck disable=SC2046
+  if [ $(command -v nginx) ]; then
+    echo "Installed Nginx."
   else
-    echo "Installing Nginx..." >>"$LOG_FILE"
+    echo "Installing Nginx latest version..."
     curl https://raw.githubusercontent.com/bauhuynhdev/linux-repo/master/nginx.repo -L -o /etc/yum.repos.d/nginx.repo
-    yum install -y nginx-1.20.2
-    echo "Installed Nginx." >>"$LOG_FILE"
+    yum install -y nginx
+    echo "To start Nginx: systemctl start nginx"
   fi
 }
 
 install_php() {
-  if command -v php >/dev/null; then
-    echo "Installed PHP." >>"$LOG_FILE"
+  # shellcheck disable=SC2046
+  if [ $(command -v php) ]; then
+    echo "Installed PHP."
   else
-    echo "Installing PHP..." >>"$LOG_FILE"
-    yum install -y https://raw.githubusercontent.com/bauhuynhdev/linux-repo/master/remi-release-7.rpm
-    yum --enablerepo=remi-php74 install -y php-fpm php-mysqlnd php-zip php-devel php-gd php-mcrypt php-mbstring php-curl php-xml php-pear php-bcmath php-json php-pgsql php-redis
-    echo "Installed PHP." >>"$LOG_FILE"
+    echo "Installing PHP 7.4 latest version"
+    yum install -y https://rpms.remirepo.net/enterprise/remi-release-7.rpm
+    yum --enablerepo=remi-php74 install -y php php-cli php-fpm php-zip php-devel php-gd php-mcrypt php-mbstring php-curl php-xml php-pear php-bcmath php-json php-mysql php-redis -y
+    echo "To start PHP-FPM: systemctl start php-fpm"
   fi
 }
 
 install_composer() {
-  if command -v /usr/local/bin/composer >/dev/null; then
-    echo "Installed Composer." >>"$LOG_FILE"
+  # shellcheck disable=SC2046
+  if [ $(command -v composer) ]; then
+    echo "Installed Composer."
   else
-    echo "Installing Composer..." >>"$LOG_FILE"
-    php -r "copy('https://raw.githubusercontent.com/bauhuynhdev/linux-repo/master/composer-setup.php', 'composer-setup.php');"
-    php composer-setup.php --install-dir=/usr/local/bin --filename=composer --version=2.2.9
+    echo "Installing Composer latest version"
+    php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+    php composer-setup.php --install-dir=/usr/local/bin --filename=composer
     php -r "unlink('composer-setup.php');"
-    echo "Installed Composer." >>"$LOG_FILE"
+    echo "Installed Composer."
   fi
 }
 
-install_node() {
-  if command -v node >/dev/null; then
-    echo "Installed Nodejs." >>"$LOG_FILE"
+install_nodejs_npm_pm2() {
+  # shellcheck disable=SC2046
+  if [ $(command -v node) ]; then
+    echo "Installed Nodejs."
   else
-    echo "Installing Nodejs..." >>"$LOG_FILE"
-    curl -L https://raw.githubusercontent.com/bauhuynhdev/linux-repo/master/setup_14.x | bash -
+    echo "Installing Nodejs 14, NPM and PM2 latest version"
+    curl -sL https://rpm.nodesource.com/setup_14.x | bash -
     yum install -y nodejs
-    npm install -g yarn
-    echo "Installed Nodejs." >>"$LOG_FILE"
+    npm install -g yarn pm2
+    echo "Installed Nodejs, NPM and PM2."
   fi
 }
 
 install_postgres() {
-  if systemctl --all --type service | grep -q "postgresql-13.service"; then
-    echo "Installed Postgres." >>"$LOG_FILE"
+  # shellcheck disable=SC2046
+  if [ $(command -v psql) ]; then
+    echo "Installed Postgres."
   else
-    echo "Installing Postgres..." >>"$LOG_FILE"
+    echo "Installing Postgres 13 latest version"
     yum install -y https://raw.githubusercontent.com/bauhuynhdev/linux-repo/master/pgdg-redhat-repo-latest.noarch.rpm
     yum install -y postgresql13-server
     /usr/pgsql-13/bin/postgresql-13-setup initdb
-    echo "Installed Postgres." >>"$LOG_FILE"
+    echo "To start Postgres: systemctl start postgresql-13"
+  fi
+}
+
+install_mysql() {
+  # shellcheck disable=SC2046
+  if [ $(command -v mysql) ]; then
+    echo "Installed MySQL."
+  else
+    echo "Installing MySQL 8 latest version"
+    rpm -Uvh https://dev.mysql.com/get/mysql80-community-release-el7-7.noarch.rpm
+    sed -i 's/enabled=1/enabled=0/' /etc/yum.repos.d/mysql-community.repo
+    yum --enablerepo=mysql80-community install mysql-community-server -y
+    echo "To start MySQL: systemctl start mysqld"
   fi
 }
 
 install_redis() {
-  if systemctl --all --type service | grep -q "redis.service"; then
-    echo "Installed Redis." >>"$LOG_FILE"
+  # shellcheck disable=SC2046
+  if [ $(command -v redis-cli) ]; then
+    echo "Installed Redis."
   else
-    echo "Installing Redis..." >>"$LOG_FILE"
+    echo "Installing Redis latest version"
     # Installed repo redis in PHP
     yum --enablerepo=remi install redis -y
-    /usr/pgsql-13/bin/postgresql-13-setup initdb
-    echo "Installed Redis." >>"$LOG_FILE"
+    echo "To start Redis: systemctl start redis"
   fi
 }
 
-enable_services() {
-  if command -v systemctl >/dev/null; then
+enable_and_start_services() {
+  # shellcheck disable=SC2046
+  if [ $(command -v systemctl) ]; then
     systemctl enable --now nginx
     systemctl enable --now php-fpm
-    systemctl enable --now postgresql-13
+    systemctl enable --now mysqld
+    grep "A temporary password" /var/log/mysqld.log
+    echo "You will need run this command to change password: mysql_secure_installation"
     systemctl enable --now redis
   fi
-  echo "Enabled services" >>"$LOG_FILE"
-}
-
-create_log_file() {
-  touch "$LOG_FILE"
-  cat /dev/null >"$LOG_FILE"
+  echo "Enabled services."
 }
 
 main() {
-  create_log_file
-  install_common
-  install_nginx
-  install_php
-  install_composer
-  install_node
-  install_postgres
-  install_redis
-  enable_services
-  echo "Check $LOG_FILE"
+  if [ -f /etc/centos-release ]; then
+    if grep -q "CentOS Linux release 7" /etc/centos-release; then
+      install_common
+      install_nginx
+      install_php
+      install_mysql
+      install_composer
+      install_nodejs_npm_pm2
+      install_redis
+      enable_and_start_services
+    else
+      echo "This is not CentOS 7."
+    fi
+  else
+    echo "This is not CentOS."
+  fi
 }
 
 main
