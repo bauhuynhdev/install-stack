@@ -1,6 +1,7 @@
 #!/bin/bash
 
 install_common() {
+  echo "----------------------------------- Installing Common -----------------------------------"
   yum update -y
   yum install -y epel-release yum-utils zip unzip net-tools curl wget gcc-c++ make nano openssl htop
   yum update -y
