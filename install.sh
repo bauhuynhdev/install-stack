@@ -82,6 +82,13 @@ install_redis() {
   echo "*********************************** Redis installed ***********************************"
 }
 
+install_firewall() {
+  echo "*********************************** Installing Firewall ***********************************"
+  yum install -y firewalld
+  systemctl enable --now firewalld
+  echo "*********************************** Firewall installed ***********************************"
+}
+
 enable_and_start_services() {
   yum update -y
   echo "*********************************** Enabling and starting services ***********************************"
@@ -108,13 +115,18 @@ enable_and_start_services() {
   echo "*********************************** MySQL temporary password ***********************************"
   grep "A temporary password" /var/log/mysqld.log
   echo "You will need run this command to change password: mysql_secure_installation"
-  echo "************************************************************************************************"
+  echo "*********************************** Enable HTTP and HTTPS port ***********************************"
+  firewall-cmd --permanent --add-service=http
+  firewall-cmd --permanent --add-service=https
+  firewall-cmd --reload
+  echo "*********************************** HTTP and HTTPS port enabled ***********************************"
 }
 
 main() {
   if [ -f /etc/centos-release ]; then
     if grep -q "CentOS Linux release 7" /etc/centos-release; then
       install_common
+      install_firewall
       install_nginx
       install_php
       install_mysql
