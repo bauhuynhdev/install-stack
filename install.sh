@@ -99,37 +99,44 @@ install_firewall() {
   echo "*********************************** Firewall installed ***********************************"
 }
 
-enable_and_start_services() {
+final() {
   yum update -y
-  echo "*********************************** Enabling and starting services ***********************************"
+#  echo "*********************************** Enabling and starting services ***********************************"
   # shellcheck disable=SC2046
-  if [ $(command -v systemctl) ]; then
-    if ! [ "$(systemctl is-active nginx)" = "active" ]; then
-      echo "*********************************** Starting Nginx ***********************************"
-      systemctl enable --now nginx
-    fi
-    if ! [ "$(systemctl is-active php-fpm)" = "active" ]; then
-      echo "*********************************** Starting PHP-FPM ***********************************"
-      systemctl enable --now php-fpm
-    fi
-    if ! [ "$(systemctl is-active mysqld)" = "active" ]; then
-      echo "*********************************** Starting MySQL ***********************************"
-      systemctl enable --now mysqld
-    fi
-    if ! [ "$(systemctl is-active redis)" = "active" ]; then
-      echo "*********************************** Starting Redis ***********************************"
-      systemctl enable --now redis
-    fi
-  fi
-  echo "*********************************** Services enabled and started ***********************************"
+#  if [ $(command -v systemctl) ]; then
+#    if ! [ "$(systemctl is-active nginx)" = "active" ]; then
+#      echo "*********************************** Starting Nginx ***********************************"
+#      systemctl enable --now nginx
+#    fi
+#    if ! [ "$(systemctl is-active php-fpm)" = "active" ]; then
+#      echo "*********************************** Starting PHP-FPM ***********************************"
+#      systemctl enable --now php-fpm
+#    fi
+#    if ! [ "$(systemctl is-active mysqld)" = "active" ]; then
+#      echo "*********************************** Starting MySQL ***********************************"
+#      systemctl enable --now mysqld
+#    fi
+#    if ! [ "$(systemctl is-active redis)" = "active" ]; then
+#      echo "*********************************** Starting Redis ***********************************"
+#      systemctl enable --now redis
+#    fi
+#  fi
+#  echo "*********************************** Services enabled and started ***********************************"
   echo "*********************************** MySQL temporary password ***********************************"
   grep "A temporary password" /var/log/mysqld.log
-  echo "You will need run this command to change password: mysql_secure_installation"
-  echo "*********************************** Enable HTTP and HTTPS port ***********************************"
+  echo "If install mysql the first time, please run this command: mysql_secure_installation"
   firewall-cmd --permanent --add-service=http
+  echo "*********************************** HTTP port enabled ***********************************"
   firewall-cmd --permanent --add-service=https
+  echo "*********************************** HTTPS port enabled ***********************************"
   firewall-cmd --reload
-  echo "*********************************** HTTP and HTTPS port enabled ***********************************"
+  echo "*********************************** Reload firewall ***********************************"
+  echo "*********************************** Basic started ***********************************"
+  echo "systemctl enable --now nginx"
+  echo "systemctl enable --now php-fpm"
+  echo "systemctl enable --now mysqld"
+  echo "systemctl enable --now redis"
+  echo "*********************************** Basic stopped ***********************************"
 }
 
 main() {
@@ -144,7 +151,7 @@ main() {
       install_composer
       install_nodejs_npm_pm2
       install_redis
-      enable_and_start_services
+      final
     else
       echo "* This script only support CentOS 7. *"
     fi
