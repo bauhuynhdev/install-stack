@@ -3,8 +3,9 @@
 install_common() {
   echo "*********************************** Installing Common ***********************************"
   yum update -y
-  yum install -y epel-release yum-utils zip unzip net-tools curl wget gcc-c++ make nano openssl htop
+  yum install -y epel-release yum-utils
   yum update -y
+  yum install -y zip unzip net-tools curl wget gcc-c++ make nano openssl htop
   echo "*********************************** Common installed ***********************************"
 }
 
