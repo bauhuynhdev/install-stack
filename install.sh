@@ -8,6 +8,16 @@ install_common() {
   echo "*********************************** Common installed ***********************************"
 }
 
+install_git() {
+  # shellcheck disable=SC2046
+  if ! [ $(command -v git) ]; then
+    echo "*********************************** Installing Git ***********************************"
+    yum -y install https://packages.endpointdev.com/rhel/7/os/x86_64/endpoint-repo.x86_64.rpm
+    yum install -y git
+  fi
+  echo "*********************************** Git installed ***********************************"
+}
+
 install_nginx() {
   # shellcheck disable=SC2046
   if ! [ $(command -v nginx) ]; then
@@ -127,6 +137,7 @@ main() {
     if grep -q "CentOS Linux release 7" /etc/centos-release; then
       install_common
       install_firewall
+      install_git
       install_nginx
       install_php
       install_mysql
