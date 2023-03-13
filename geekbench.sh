@@ -1,8 +1,15 @@
 #!/bin/bash
 
 main() {
+  remove_old
   download_and_unzip
   final
+}
+
+remove_old() {
+  echo "*********************************** Removing old ***********************************"
+  sudo rm -rf /tmp/Geekbench-*
+  echo "*********************************** Removed old ***********************************"
 }
 
 download_and_unzip() {
