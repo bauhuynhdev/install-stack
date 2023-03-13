@@ -2,7 +2,7 @@
 
 main() {
   remove_old
-  download_and_unzip
+  download
   final
 }
 
@@ -12,13 +12,16 @@ remove_old() {
   echo "*********************************** Removed old ***********************************"
 }
 
-download_and_unzip() {
-  echo "*********************************** Downloading ***********************************"
-  sudo curl -sL https://cdn.geekbench.com/Geekbench-5.5.1-Linux.tar.gz -o /tmp/Geekbench-5.5.1-Linux.tar.gz
-  echo "*********************************** Downloaded ***********************************"
+unzip() {
   echo "*********************************** Unzipping ***********************************"
   sudo tar -zxvf /tmp/Geekbench-5.5.1-Linux.tar.gz -C /tmp
   echo "*********************************** Unzipped ***********************************"
+}
+
+download() {
+  echo "*********************************** Downloading ***********************************"
+  sudo curl -sL https://cdn.geekbench.com/Geekbench-5.5.1-Linux.tar.gz -o /tmp/Geekbench-5.5.1-Linux.tar.gz
+  echo "*********************************** Downloaded ***********************************"
 }
 
 final() {
