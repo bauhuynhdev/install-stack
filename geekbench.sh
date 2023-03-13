@@ -19,3 +19,5 @@ final() {
   sudo /tmp/Geekbench-5.5.1-Linux/geekbench5
   echo "*********************************** Done ***********************************"
 }
+
+main
