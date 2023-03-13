@@ -3,6 +3,7 @@
 main() {
   remove_old
   download
+  unzip
   final
 }
 
